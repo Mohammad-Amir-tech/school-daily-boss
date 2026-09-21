@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "School Daily Boss"
+description = "A focused AI control room for principals and teachers at Indian schools that still run on registers, marksheets, and teacher updates."
+version = "1.0.0"
+id = "artifacts/school-daily-boss"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21943
+
+[services.development]
+run = "pnpm --filter @workspace/school-daily-boss run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/school-daily-boss", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/school-daily-boss/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21943"
+BASE_PATH = "/"

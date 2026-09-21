@@ -1,0 +1,652 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: School Daily Boss API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: school
+  - name: dashboard
+  - name: attendance
+  - name: marks
+  - name: teacher-updates
+  - name: intelligence
+  - name: management
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /school:
+    get:
+      operationId: getSchool
+      tags: [school]
+      summary: Get the current user's school
+      responses:
+        "200":
+          description: School
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/School"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get today's school intelligence dashboard
+      responses:
+        "200":
+          description: Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /attendance:
+    get:
+      operationId: getAttendanceOverview
+      tags: [attendance]
+      summary: Get attendance overview
+      parameters:
+        - $ref: "#/components/parameters/RangeParam"
+      responses:
+        "200":
+          description: Attendance overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttendanceOverview"
+  /attendance/extract:
+    post:
+      operationId: extractAttendance
+      tags: [attendance]
+      summary: Extract attendance from a register upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractionInput"
+      responses:
+        "200":
+          description: Reviewable extraction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractionPreview"
+  /attendance/confirm:
+    post:
+      operationId: confirmAttendance
+      tags: [attendance]
+      summary: Confirm reviewed attendance rows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttendanceConfirmInput"
+      responses:
+        "201":
+          description: Saved attendance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveResult"
+  /marks:
+    get:
+      operationId: getMarksOverview
+      tags: [marks]
+      summary: Get academic performance overview
+      parameters:
+        - $ref: "#/components/parameters/RangeParam"
+      responses:
+        "200":
+          description: Marks overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarksOverview"
+  /marks/extract:
+    post:
+      operationId: extractMarks
+      tags: [marks]
+      summary: Extract marks from a marksheet upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractionInput"
+      responses:
+        "200":
+          description: Reviewable extraction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractionPreview"
+  /marks/confirm:
+    post:
+      operationId: confirmMarks
+      tags: [marks]
+      summary: Confirm reviewed marks rows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarksConfirmInput"
+      responses:
+        "201":
+          description: Saved marks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveResult"
+  /teacher-updates:
+    get:
+      operationId: getTeacherUpdates
+      tags: [teacher-updates]
+      summary: List recent teacher updates
+      responses:
+        "200":
+          description: Teacher updates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeacherUpdate"
+  /teacher-updates/extract:
+    post:
+      operationId: extractTeacherUpdate
+      tags: [teacher-updates]
+      summary: Transcribe and structure a teacher voice note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractionInput"
+      responses:
+        "200":
+          description: Reviewable extraction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherUpdatePreview"
+  /teacher-updates/confirm:
+    post:
+      operationId: confirmTeacherUpdate
+      tags: [teacher-updates]
+      summary: Confirm reviewed teacher update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeacherUpdateConfirmInput"
+      responses:
+        "201":
+          description: Saved teacher update
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveResult"
+  /changes:
+    get:
+      operationId: getChanges
+      tags: [intelligence]
+      summary: Compare school signals over time
+      parameters:
+        - $ref: "#/components/parameters/RangeParam"
+      responses:
+        "200":
+          description: Changes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeSummary"
+  /insights:
+    get:
+      operationId: getInsights
+      tags: [intelligence]
+      summary: List current school insights
+      responses:
+        "200":
+          description: Insights
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Insight"
+  /issues/{issueId}:
+    get:
+      operationId: getIssue
+      tags: [intelligence]
+      summary: Get issue evidence and timeline
+      parameters:
+        - name: issueId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Issue detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueDetail"
+  /chat:
+    post:
+      operationId: answerPrincipalQuestion
+      tags: [intelligence]
+      summary: Answer a question from recorded school data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatQuestion"
+      responses:
+        "200":
+          description: Answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatAnswer"
+  /classes:
+    get:
+      operationId: getClasses
+      tags: [management]
+      summary: List classes and sections
+      responses:
+        "200":
+          description: Classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Classroom"
+  /students:
+    get:
+      operationId: getStudents
+      tags: [management]
+      summary: List students
+      responses:
+        "200":
+          description: Students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+    post:
+      operationId: createStudent
+      tags: [management]
+      summary: Add a student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentInput"
+      responses:
+        "201":
+          description: Student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+  /teachers:
+    get:
+      operationId: getTeachers
+      tags: [management]
+      summary: List teachers
+      responses:
+        "200":
+          description: Teachers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Teacher"
+components:
+  parameters:
+    RangeParam:
+      name: range
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [today, yesterday, last7, last30]
+        default: today
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    School:
+      type: object
+      required: [id, name, city, demo]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        city: { type: string }
+        demo: { type: boolean }
+        principalName: { type: string }
+    Dashboard:
+      type: object
+      required: [school, health, issueCounts, issues, academicSnapshot, attendanceSnapshot]
+      properties:
+        school: { $ref: "#/components/schemas/School" }
+        health: { type: string, enum: [urgent, attention, normal] }
+        issueCounts:
+          $ref: "#/components/schemas/IssueCounts"
+        issues:
+          type: array
+          items: { $ref: "#/components/schemas/Insight" }
+        academicSnapshot:
+          $ref: "#/components/schemas/AcademicSnapshot"
+        attendanceSnapshot:
+          $ref: "#/components/schemas/AttendanceSnapshot"
+    IssueCounts:
+      type: object
+      required: [urgent, attention, normal]
+      properties:
+        urgent: { type: integer }
+        attention: { type: integer }
+        normal: { type: integer }
+    Insight:
+      type: object
+      required: [id, severity, category, title, evidence, whyItMatters, suggestedAction, confidence]
+      properties:
+        id: { type: string }
+        severity: { type: string, enum: [urgent, attention, normal, positive] }
+        category: { type: string, enum: [attendance, academic, homework, teacher_update, student_issue] }
+        title: { type: string }
+        evidence: { type: string }
+        whyItMatters: { type: string }
+        suggestedAction: { type: string }
+        confidence: { type: number }
+        classLabel: { type: ["string", "null"] }
+        studentCount: { type: ["integer", "null"] }
+    AcademicSnapshot:
+      type: object
+      required: [average, assessmentsTracked, belowThreshold]
+      properties:
+        average: { type: number }
+        assessmentsTracked: { type: integer }
+        belowThreshold: { type: integer }
+    AttendanceSnapshot:
+      type: object
+      required: [todayPercent, averagePercent, absentToday, classesTracked]
+      properties:
+        todayPercent: { type: number }
+        averagePercent: { type: number }
+        absentToday: { type: integer }
+        classesTracked: { type: integer }
+    AttendanceOverview:
+      type: object
+      required: [daily, students, classes]
+      properties:
+        daily:
+          type: array
+          items: { $ref: "#/components/schemas/TrendPoint" }
+        students:
+          type: array
+          items: { $ref: "#/components/schemas/AttendanceStudent" }
+        classes:
+          type: array
+          items: { $ref: "#/components/schemas/ClassAttendance" }
+    MarksOverview:
+      type: object
+      required: [average, highest, lowest, subjects, students]
+      properties:
+        average: { type: number }
+        highest: { type: number }
+        lowest: { type: number }
+        subjects:
+          type: array
+          items: { $ref: "#/components/schemas/SubjectPerformance" }
+        students:
+          type: array
+          items: { $ref: "#/components/schemas/StudentMarkSummary" }
+    TrendPoint:
+      type: object
+      required: [label, value]
+      properties:
+        label: { type: string }
+        value: { type: number }
+    AttendanceStudent:
+      type: object
+      required: [studentId, studentName, classLabel, percentage, consecutiveAbsences]
+      properties:
+        studentId: { type: string }
+        studentName: { type: string }
+        classLabel: { type: string }
+        percentage: { type: number }
+        consecutiveAbsences: { type: integer }
+        repeatedAbsence: { type: boolean }
+    ClassAttendance:
+      type: object
+      required: [classLabel, percentage, change]
+      properties:
+        classLabel: { type: string }
+        percentage: { type: number }
+        change: { type: number }
+    SubjectPerformance:
+      type: object
+      required: [subject, average, change]
+      properties:
+        subject: { type: string }
+        average: { type: number }
+        change: { type: number }
+    StudentMarkSummary:
+      type: object
+      required: [studentId, studentName, classLabel, percentage, status]
+      properties:
+        studentId: { type: string }
+        studentName: { type: string }
+        classLabel: { type: string }
+        percentage: { type: number }
+        status: { type: string, enum: [strong, watch, below_threshold] }
+    ExtractionInput:
+      type: object
+      required: [fileName, mediaType]
+      properties:
+        fileName: { type: string }
+        mediaType: { type: string }
+        objectPath: { type: ["string", "null"] }
+    ExtractionPreview:
+      type: object
+      required: [id, sourceFile, confidence, rows, warnings, requiresReview]
+      properties:
+        id: { type: string }
+        sourceFile: { type: string }
+        confidence: { type: number }
+        requiresReview: { type: boolean }
+        warnings:
+          type: array
+          items: { type: string }
+        rows:
+          type: array
+          items: { $ref: "#/components/schemas/AttendanceRow" }
+    AttendanceRow:
+      type: object
+      required: [studentName, date, status, confidence]
+      properties:
+        studentName: { type: string }
+        date: { type: string }
+        status: { type: string, enum: [present, absent] }
+        confidence: { type: number }
+    MarkRow:
+      type: object
+      required: [studentName, subject, test, marks, maximumMarks, date, confidence]
+      properties:
+        studentName: { type: string }
+        subject: { type: string }
+        test: { type: string }
+        marks: { type: number }
+        maximumMarks: { type: number }
+        date: { type: string }
+        confidence: { type: number }
+    TeacherUpdateRow:
+      type: object
+      required: [classLabel, absentCount, homeworkPending, subject, topic, observation, confidence]
+      properties:
+        classLabel: { type: string }
+        absentCount: { type: integer }
+        homeworkPending: { type: integer }
+        subject: { type: string }
+        topic: { type: string }
+        observation: { type: string }
+        confidence: { type: number }
+    AttendanceConfirmInput:
+      type: object
+      required: [extractionId, rows]
+      properties:
+        extractionId: { type: string }
+        rows:
+          type: array
+          items: { $ref: "#/components/schemas/AttendanceRow" }
+    MarksConfirmInput:
+      type: object
+      required: [extractionId, rows]
+      properties:
+        extractionId: { type: string }
+        rows:
+          type: array
+          items: { $ref: "#/components/schemas/MarkRow" }
+    TeacherUpdatePreview:
+      type: object
+      required: [id, sourceFile, transcript, confidence, fields, requiresReview]
+      properties:
+        id: { type: string }
+        sourceFile: { type: string }
+        transcript: { type: string }
+        confidence: { type: number }
+        requiresReview: { type: boolean }
+        fields: { $ref: "#/components/schemas/TeacherUpdateRow" }
+    TeacherUpdateConfirmInput:
+      type: object
+      required: [extractionId, fields]
+      properties:
+        extractionId: { type: string }
+        fields: { $ref: "#/components/schemas/TeacherUpdateRow" }
+    SaveResult:
+      type: object
+      required: [savedCount, auditLogId]
+      properties:
+        savedCount: { type: integer }
+        auditLogId: { type: string }
+    TeacherUpdate:
+      type: object
+      required: [id, teacherName, createdAt, summary]
+      properties:
+        id: { type: string }
+        teacherName: { type: string }
+        createdAt: { type: string }
+        summary: { type: string }
+        classLabel: { type: string }
+    ChangeSummary:
+      type: object
+      required: [range, attendance, academics, homework, teacherUpdates, studentIssues]
+      properties:
+        range: { type: string }
+        attendance: { $ref: "#/components/schemas/ChangeMetric" }
+        academics: { $ref: "#/components/schemas/ChangeMetric" }
+        homework: { $ref: "#/components/schemas/ChangeMetric" }
+        teacherUpdates: { $ref: "#/components/schemas/ChangeMetric" }
+        studentIssues: { $ref: "#/components/schemas/ChangeMetric" }
+    ChangeMetric:
+      type: object
+      required: [current, previous, delta, status]
+      properties:
+        current: { type: number }
+        previous: { type: number }
+        delta: { type: number }
+        status: { type: string, enum: [up, down, stable, insufficient_data] }
+        note: { type: string }
+    IssueDetail:
+      type: object
+      required: [issue, timeline]
+      properties:
+        issue: { $ref: "#/components/schemas/Insight" }
+        timeline:
+          type: array
+          items: { $ref: "#/components/schemas/TimelineEvent" }
+        relatedStudents:
+          type: array
+          items: { $ref: "#/components/schemas/Student" }
+    TimelineEvent:
+      type: object
+      required: [date, label, detail]
+      properties:
+        date: { type: string }
+        label: { type: string }
+        detail: { type: string }
+    ChatQuestion:
+      type: object
+      required: [question]
+      properties:
+        question: { type: string, minLength: 1 }
+    ChatAnswer:
+      type: object
+      required: [answer, evidence, sufficientData]
+      properties:
+        answer: { type: string }
+        evidence:
+          type: array
+          items: { type: string }
+        sufficientData: { type: boolean }
+    Classroom:
+      type: object
+      required: [id, label, studentCount, teacherCount]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        studentCount: { type: integer }
+        teacherCount: { type: integer }
+    Student:
+      type: object
+      required: [id, name, classLabel, rollNumber]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        classLabel: { type: string }
+        rollNumber: { type: string }
+        attendancePercent: { type: number }
+    StudentInput:
+      type: object
+      required: [name, classId, rollNumber]
+      properties:
+        name: { type: string }
+        classId: { type: string }
+        rollNumber: { type: string }
+    Teacher:
+      type: object
+      required: [id, name, email, assignments]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        assignments:
+          type: array
+          items: { type: string }
